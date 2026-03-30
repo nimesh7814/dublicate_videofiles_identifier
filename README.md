@@ -124,9 +124,16 @@ Adjust before scanning. The scan always uses whatever value the slider is set to
 
 ```
 video-duplicate-manager/
-├── video_duplicate_manager.py 
+├── video_duplicate_manager.py   # Main application (single file)
 ├── README.md
+└── cleanup.bat                  # Optional: empty Recycle Bin + clear Explorer history
 ```
+
+---
+
+## 🧹 Bonus: cleanup.bat
+
+Included `cleanup.bat` empties the Recycle Bin, clears Windows File Explorer search history, and clears the Recent Files list. Run it as Administrator.
 
 ---
 

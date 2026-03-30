@@ -54,6 +54,10 @@ if sys.platform == "win32":
 
 COPY_SUFFIX_RE = re.compile(r'(?:\s*\(\d+\)|_\d+)$')
 
+# Matches a trailing _<anything> segment from the LAST underscore onward.
+# Used to detect JDownloader-style random suffixes like _XdcbaDIb or _(1).
+_LAST_UNDERSCORE_RE = re.compile(r'_[^_]+$')
+
 # Separators / noise tokens to strip when normalising names for fuzzy comparison
 _SEP_RE    = re.compile(r'[\s\-_\.]+')
 _NOISE_RE  = re.compile(r'\b(hd|sd|fhd|uhd|4k|2k|720p|1080p|2160p|480p|copy|final|edit|v\d+|part\d+)\b', re.I)
@@ -73,8 +77,20 @@ def _norm(p: str) -> str:
 
 
 def _stem_base(filename: str) -> str:
-    """'holiday (2).mp4' -> 'holiday',  'clip_5.mkv' -> 'clip'"""
-    return COPY_SUFFIX_RE.sub('', Path(filename).stem).strip()
+    """
+    Strip known copy suffixes from the stem, then also strip any trailing
+    _<anything> segment from the last underscore onward.
+
+    Examples:
+      'holiday (2).mp4'     -> 'holiday'
+      'clip_5.mkv'          -> 'clip'
+      'movie_XdcbaDIb.mp4'  -> 'movie'
+      'show_(1).mkv'        -> 'show'
+      'some_title_abc.mp4'  -> 'some_title'  (only last segment stripped)
+    """
+    stem = COPY_SUFFIX_RE.sub('', Path(filename).stem).strip()
+    stem = _LAST_UNDERSCORE_RE.sub('', stem).strip('_ ')
+    return stem
 
 
 def _normalise_for_similarity(name: str) -> str:
@@ -98,7 +114,14 @@ def _similarity(a: str, b: str) -> float:
 
 
 def is_copy(filename: str) -> bool:
-    return bool(COPY_SUFFIX_RE.search(Path(filename).stem))
+    """
+    Returns True if the filename looks like a copy/duplicate variant:
+      - Ends with (N)           e.g. holiday (2).mp4
+      - Ends with _N            e.g. clip_5.mkv
+      - Has a trailing _<chars> e.g. movie_XdcbaDIb.mp4
+    """
+    stem = Path(filename).stem
+    return bool(COPY_SUFFIX_RE.search(stem) or _LAST_UNDERSCORE_RE.search(stem))
 
 
 # ---------------------------------------------------------------------------

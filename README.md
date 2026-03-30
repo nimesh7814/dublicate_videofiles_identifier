@@ -130,12 +130,6 @@ video-duplicate-manager/
 
 ---
 
-## 🧹 Bonus: cleanup.bat
-
-Included `cleanup.bat` empties the Recycle Bin, clears Windows File Explorer search history, and clears the Recent Files list. Run it as Administrator.
-
----
-
 ## ⚙️ Configuration (in-code)
 
 | Constant | Default | Description |
